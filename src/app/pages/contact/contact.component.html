@@ -1,0 +1,80 @@
+<div class="page-wrapper">
+
+  <!-- HERO -->
+  <div class="page-hero">
+
+    <div class="hero-icon">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <rect x="3" y="7" width="30" height="22" rx="3"
+              stroke="#7ec8e3" stroke-width="1.8"/>
+        <path d="M3 12l15 10 15-10"
+              stroke="#7ec8e3" stroke-width="1.8"
+              stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div>
+      <div class="breadcrumb">
+        <a routerLink="/dashboard">Dashboard</a>
+        <span>›</span>
+        <span>Contact</span>
+      </div>
+
+      <h1 class="hero-title">Contact TIPIC</h1>
+      <p class="hero-sub">
+        Reach our team across all Tunisian ports — Tunis, Bizerte, Sousse & Sfax.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- CONTACTS GRID -->
+  <div class="contacts-grid">
+
+    <div class="contact-card" *ngFor="let c of contacts">
+
+      <div class="contact-name">{{ c.name }}</div>
+      <div class="contact-role">{{ c.role }}</div>
+
+      <div class="contact-detail">
+
+        <!-- EMAIL -->
+        <div class="contact-row">
+          <a [href]="'mailto:' + c.email">
+            {{ c.email }}
+          </a>
+        </div>
+
+        <!-- PHONE -->
+        <div class="contact-row">
+          <span>{{ c.phones }}</span>
+        </div>
+
+        <!-- FAX (optional) -->
+        <div class="contact-row" *ngIf="c.fax">
+          <span>Fax: {{ c.fax }}</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-bar">
+
+    <div>
+      <div class="cta-title">Head Office — Tunis</div>
+      <div class="cta-sub">
+        Immeuble Luxor 2, Rue 8300 Montplaisir, 1037 Tunis, Tunisia
+      </div>
+    </div>
+
+    <a [href]="'mailto:' + contacts[0].email" class="btn-cta">
+      Send Email →
+    </a>
+
+  </div>
+
+</div>

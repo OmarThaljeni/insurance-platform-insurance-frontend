@@ -1,0 +1,390 @@
+<!-- dashboard.component.html -->
+<div class="dashboard-wrapper">
+
+  <!-- ═══════ TOP NAVIGATION BAR ═══════ -->
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <div class="nav-emblem">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <path d="M14 3L24 8V16C24 21 19.5 25 14 25S4 21 4 16V8L14 3Z"
+                stroke="#7ec8e3" stroke-width="1.5" fill="none"/>
+          <path d="M10 14L13 17L18 11" stroke="#7ec8e3" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="nav-brand-text">
+        <span class="nav-brand-name">TIPIC</span>
+        <span class="nav-brand-sub">Partner Portal</span>
+      </div>
+    </div>
+
+    <!-- Desktop menu -->
+    <ul class="nav-menu">
+      <li class="nav-item" [class.active]="activeRoute === 'dashboard'">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <rect x="1" y="1" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+            <rect x="8.5" y="1" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+            <rect x="1" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+            <rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+          Dashboard
+        </a>
+      </li>
+
+      <!-- Services dropdown -->
+      <li class="nav-item has-dropdown" [class.open]="openDropdown === 'services'">
+        <button class="nav-link dropdown-trigger" (click)="toggleDropdown('services')">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <path d="M7.5 1.5L13 4.5V9.5C13 12 10.8 14 7.5 14S2 12 2 9.5V4.5L7.5 1.5Z"
+                  stroke="currentColor" stroke-width="1.2" fill="none"/>
+          </svg>
+          Our Services
+          <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="dropdown-panel">
+          <a routerLink="/services/marine-surveys" class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M2 10L7 4L12 10" stroke="#4a9fd4" stroke-width="1.2"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="7" y1="4" x2="7" y2="11" stroke="#4a9fd4" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Marine Surveys
+          </a>
+          <a routerLink="/services/legal-assistance" class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <rect x="2" y="2" width="10" height="10" rx="1.5" stroke="#4a9fd4" stroke-width="1.2"/>
+              <path d="M4.5 5h5M4.5 7.5h3" stroke="#4a9fd4" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Legal Assistance
+          </a>
+          <a routerLink="/services/general-average" class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 2v10M2 7h10" stroke="#4a9fd4" stroke-width="1.2" stroke-linecap="round"/>
+              <circle cx="7" cy="7" r="5" stroke="#4a9fd4" stroke-width="1.2"/>
+            </svg>
+            General Average Cases
+          </a>
+          <a routerLink="/services/pollution" class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 2C4.5 2 2 4 2 7s2 5 5 5 5-2 5-5-2.5-5-5-5z" stroke="#4a9fd4" stroke-width="1.2"/>
+              <path d="M4.5 9.5C5 8 6 7 7 7" stroke="#4a9fd4" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Pollution Cases
+          </a>
+          <a routerLink="/services/stowaways" class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <circle cx="7" cy="4.5" r="2" stroke="#4a9fd4" stroke-width="1.2"/>
+              <path d="M2.5 12c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="#4a9fd4" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Stowaways Matters
+          </a>
+          <a routerLink="/services/medical-assistance" class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 3v8M3 7h8" stroke="#4a9fd4" stroke-width="1.8" stroke-linecap="round"/>
+              <rect x="2" y="2" width="10" height="10" rx="2" stroke="#4a9fd4" stroke-width="1.2"/>
+            </svg>
+            Medical Assistance
+          </a>
+          <a routerLink="/services/customs-fines" class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M4 7h6M4 4.5h6M4 9.5h3" stroke="#4a9fd4" stroke-width="1.2" stroke-linecap="round"/>
+              <rect x="1.5" y="1.5" width="11" height="11" rx="1.5" stroke="#4a9fd4" stroke-width="1.2"/>
+            </svg>
+            Customs Fines
+          </a>
+        </div>
+      </li>
+
+      <li class="nav-item" [class.active]="activeRoute === 'claims'">
+        <a routerLink="/claims" routerLinkActive="active" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <path d="M2 13V4.5L7.5 2L13 4.5V13H2Z" stroke="currentColor" stroke-width="1.2" fill="none"/>
+            <path d="M5 8h5M5 10.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          Claims
+        </a>
+      </li>
+
+      <li class="nav-item" [class.active]="activeRoute === 'vessels'">
+        <a routerLink="/vessels" routerLinkActive="active" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <path d="M2 9l1.5-5h8L13 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M1 11c1-.5 2-.5 3 0s2 .5 3 0 2-.5 3 0 2 .5 3 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="7.5" y1="4" x2="7.5" y2="1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          Vessels
+        </a>
+      </li>
+
+      <li class="nav-item" [class.active]="activeRoute === 'news'">
+        <a routerLink="/news" routerLinkActive="active" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <rect x="1" y="2" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M4 6h7M4 8.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          News
+        </a>
+      </li>
+
+      <li class="nav-item" [class.active]="activeRoute === 'contact'">
+        <a routerLink="/services/contacts" routerLinkActive="active" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <rect x="1" y="3" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M1 5l6.5 4.5L14 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          Contact
+        </a>
+      </li>
+    </ul>
+
+    <!-- Right actions -->
+    <div class="nav-actions">
+      <div class="nav-alert-btn" title="Notifications">
+        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
+          <path d="M8.5 2.5C6 2.5 4 4.5 4 7v3.5l-1.5 2H14L12.5 10V7c0-2.5-2-4.5-4-4.5Z"
+                stroke="currentColor" stroke-width="1.2" fill="none"/>
+          <path d="M7 13.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+        <span class="alert-dot"></span>
+      </div>
+
+      <!-- User menu -->
+      <div class="nav-user" [class.open]="openDropdown === 'user'" (click)="toggleDropdown('user')">
+        <div class="user-avatar">{{ userInitials }}</div>
+        <span class="user-name">{{ userName }}</span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <div class="dropdown-panel user-dropdown">
+          <div class="user-dropdown-header">
+            <div class="user-avatar lg">{{ userInitials }}</div>
+            <div>
+              <div class="user-full-name">{{ userName }}</div>
+              <div class="user-role">P&amp;I Partner</div>
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a routerLink="/profile" class="dropdown-item">Profile settings</a>
+          <a routerLink="/security" class="dropdown-item">Security</a>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item danger" (click)="logout()">Sign out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile hamburger -->
+    <button class="hamburger" (click)="toggleMobileMenu()" [class.open]="mobileMenuOpen" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile side drawer -->
+  <div class="mobile-overlay" [class.visible]="mobileMenuOpen" (click)="toggleMobileMenu()"></div>
+  <div class="mobile-drawer" [class.open]="mobileMenuOpen">
+    <div class="mobile-drawer-header">
+      <div class="nav-brand">
+        <div class="nav-emblem">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+            <path d="M14 3L24 8V16C24 21 19.5 25 14 25S4 21 4 16V8L14 3Z"
+                  stroke="#7ec8e3" stroke-width="1.5" fill="none"/>
+            <path d="M10 14L13 17L18 11" stroke="#7ec8e3" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="nav-brand-name">TIPIC</span>
+      </div>
+    </div>
+    <nav class="mobile-nav">
+      <a routerLink="/dashboard" class="mobile-nav-item" (click)="toggleMobileMenu()">Dashboard</a>
+      <div class="mobile-nav-group">
+        <div class="mobile-nav-label">Our Services</div>
+        <a routerLink="/services/marine-surveys" class="mobile-nav-item sub" (click)="toggleMobileMenu()">Marine Surveys</a>
+        <a routerLink="/services/legal-assistance" class="mobile-nav-item sub" (click)="toggleMobileMenu()">Legal Assistance</a>
+        <a routerLink="/services/general-average" class="mobile-nav-item sub" (click)="toggleMobileMenu()">General Average</a>
+        <a routerLink="/services/pollution" class="mobile-nav-item sub" (click)="toggleMobileMenu()">Pollution Cases</a>
+        <a routerLink="/services/stowaways" class="mobile-nav-item sub" (click)="toggleMobileMenu()">Stowaways</a>
+        <a routerLink="/services/medical-assistance" class="mobile-nav-item sub" (click)="toggleMobileMenu()">Medical Assistance</a>
+        <a routerLink="/services/customs-fines" class="mobile-nav-item sub" (click)="toggleMobileMenu()">Customs Fines</a>
+      </div>
+      <a routerLink="/claims" class="mobile-nav-item" (click)="toggleMobileMenu()">Claims</a>
+      <a routerLink="/vessels" class="mobile-nav-item" (click)="toggleMobileMenu()">Vessels</a>
+      <a routerLink="/news" class="mobile-nav-item" (click)="toggleMobileMenu()">News</a>
+      <a routerLink="/services/contacts" class="mobile-nav-item" (click)="toggleMobileMenu()">Contact</a>
+    </nav>
+  </div>
+
+  <!-- ═══════ PAGE CONTENT ═══════ -->
+  <main class="page-content" (click)="closeAllDropdowns()">
+
+    <!-- Welcome header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-breadcrumb">Portal / Dashboard</div>
+        <h1 class="page-title">Welcome back, {{ firstName }}</h1>
+        <p class="page-sub">Here's your operational overview across all Tunisian ports.</p>
+      </div>
+      <div class="page-header-right">
+        <div class="date-chip">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <rect x="1.5" y="2" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M4.5 1v2M9.5 1v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M1.5 5.5h11" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+          {{ today | date:'MMMM d, y' }}
+        </div>
+        <button class="btn-new-claim" routerLink="/claims/new">
+          + New Claim
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M2 13l2-6h10l2 6H2Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/>
+            <path d="M9 7V3M6 4l3-1.5L12 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M1 15c1-.6 2-.6 3 0s2 .6 3 0 2-.6 3 0 2 .6 3 0 2-.6 3 0"
+                  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ stats.vessels }}</div>
+          <div class="stat-label">Active Vessels</div>
+        </div>
+        <div class="stat-trend up">+2</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M2 15V5.5L9 3l7 2.5V15H2Z" stroke="currentColor" stroke-width="1.3" fill="none"/>
+            <path d="M6 10h6M6 12.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ stats.openClaims }}</div>
+          <div class="stat-label">Open Claims</div>
+        </div>
+        <div class="stat-trend neutral">—</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon teal">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M3 15c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ stats.crewAssisted }}</div>
+          <div class="stat-label">Crew Assisted</div>
+        </div>
+        <div class="stat-trend up">+7</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon red">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M9 5.5V9l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ stats.pendingActions }}</div>
+          <div class="stat-label">Pending Actions</div>
+        </div>
+        <div class="stat-trend down">-1</div>
+      </div>
+    </div>
+
+    <!-- Main content grid -->
+    <div class="content-grid">
+
+      <!-- Recent Claims -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Recent Claims</h2>
+          <a routerLink="/claims" class="card-link">View all →</a>
+        </div>
+        <div class="claims-list">
+          <div class="claim-row" *ngFor="let claim of recentClaims">
+            <div class="claim-vessel">{{ claim.vessel }}</div>
+            <div class="claim-type">{{ claim.type }}</div>
+            <div class="claim-badge" [ngClass]="'badge-' + claim.status">{{ claim.status }}</div>
+            <div class="claim-date">{{ claim.date }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services quick access -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Quick Access</h2>
+        </div>
+        <div class="services-grid">
+          <a routerLink="/services/marine-surveys" class="service-tile">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+              <path d="M3 15l2-7h12l2 7H3Z" stroke="#4a9fd4" stroke-width="1.3" fill="none"/>
+              <line x1="11" y1="8" x2="11" y2="3" stroke="#4a9fd4" stroke-width="1.3"/>
+              <path d="M1 18c1.5-.8 3-.8 4.5 0s3 .8 4.5 0 3-.8 4.5 0 3 .8 4.5 0"
+                    stroke="#4a9fd4" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <span>Marine Surveys</span>
+          </a>
+          <a routerLink="/services/legal-assistance" class="service-tile">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+              <rect x="3" y="2" width="16" height="18" rx="2" stroke="#4a9fd4" stroke-width="1.3"/>
+              <path d="M7 8h8M7 11.5h8M7 15h5" stroke="#4a9fd4" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <span>Legal Assistance</span>
+          </a>
+          <a routerLink="/services/medical-assistance" class="service-tile">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+              <rect x="3" y="3" width="16" height="16" rx="2" stroke="#4a9fd4" stroke-width="1.3"/>
+              <path d="M11 7v8M7 11h8" stroke="#4a9fd4" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span>Medical Assistance</span>
+          </a>
+          <a routerLink="/services/pollution" class="service-tile">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" stroke="#4a9fd4" stroke-width="1.3"/>
+              <path d="M7 15.5C8 13 9.5 11 11 11" stroke="#4a9fd4" stroke-width="1.3" stroke-linecap="round"/>
+              <circle cx="11" cy="8" r="1.5" fill="#4a9fd4"/>
+            </svg>
+            <span>Pollution Cases</span>
+          </a>
+          <a routerLink="/services/stowaways" class="service-tile">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+              <circle cx="11" cy="7" r="3" stroke="#4a9fd4" stroke-width="1.3"/>
+              <path d="M4 19c0-4 3-7 7-7s7 3 7 7" stroke="#4a9fd4" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <span>Stowaways</span>
+          </a>
+          <a routerLink="/services/customs-fines" class="service-tile">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+              <rect x="3" y="3" width="16" height="16" rx="2" stroke="#4a9fd4" stroke-width="1.3"/>
+              <path d="M7 8h8M7 11h8M7 14h5" stroke="#4a9fd4" stroke-width="1.3" stroke-linecap="round"/>
+              <circle cx="15.5" cy="14" r="1.5" fill="#e5a200"/>
+            </svg>
+            <span>Customs Fines</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+      <span>© TIPIC 2025 — Immeuble Luxor 2, Rue 8300 Montplaisir, 1037 Tunis</span>
+      <span class="footer-sep">·</span>
+      <a routerLink="/terms">Terms</a>
+      <span class="footer-sep">·</span>
+      <a routerLink="/privacy">Privacy</a>
+    </footer>
+
+  </main>
+</div>
