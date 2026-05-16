@@ -1,51 +1,101 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface LoginResponse {
-  data: {
-    token: string;
-    user: {
-      id: string;
-      username: string;
-      role: string;
-    };
-  };
-  message: string;
+  access_token: string;
+  token_type: string;
+  username: string;
+  role: string;
+  email: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
 
   private readonly API = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
-  /* ── Credentials login ── */
-  login(username: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.API}/auth/login`, {
-      username,
-      password
-    });
+  // =========================
+  // LOGIN
+  // =========================
+  login(
+    username: string,
+    password: string,
+    rememberMe: boolean = false
+  ): Observable<LoginResponse> {
+
+    return this.http.post<LoginResponse>(
+      `${this.API}/auth/login`,
+      {
+        username,
+        password
+      }
+    ).pipe(
+      tap((response: LoginResponse) => {
+
+        const storage = rememberMe
+          ? localStorage
+          : sessionStorage;
+
+        storage.setItem('token', response.access_token);
+        storage.setItem('username', response.username);
+        storage.setItem('role', response.role);
+        storage.setItem('email', response.email);
+      })
+    );
   }
 
-  /* ── SSO redirect ── */
-  loginWithSSO(): void {
-    window.location.href = `${this.API}/auth/sso`;
-  }
-
-  /* ── Token helpers ── */
+  // =========================
+  // GET TOKEN
+  // =========================
   getToken(): string | null {
-    return localStorage.getItem('token') ?? sessionStorage.getItem('token');
+
+    return (
+      localStorage.getItem('token') ||
+      sessionStorage.getItem('token')
+    );
   }
 
+  // =========================
+  // GET ROLE
+  // =========================
+  getRole(): string | null {
+
+    return (
+      localStorage.getItem('role') ||
+      sessionStorage.getItem('role')
+    );
+  }
+
+  // =========================
+  // GET USERNAME
+  // =========================
+  getUsername(): string | null {
+
+    return (
+      localStorage.getItem('username') ||
+      sessionStorage.getItem('username')
+    );
+  }
+
+  // =========================
+  // CHECK LOGIN
+  // =========================
   isLoggedIn(): boolean {
+
     return !!this.getToken();
   }
 
+  // =========================
+  // LOGOUT
+  // =========================
   logout(): void {
-    localStorage.removeItem('token');
-    sessionStorage.removeItem('token');
+    localStorage.clear();
+    sessionStorage.clear();
   }
 }
