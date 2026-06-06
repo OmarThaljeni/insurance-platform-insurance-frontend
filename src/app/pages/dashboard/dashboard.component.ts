@@ -33,7 +33,7 @@ interface UserForm {
   email: string;
   username: string;
   password: string;
-  role: 'ADMIN' | 'USER' | 'PARTNER';
+  role: 'ADMIN' | 'CLIENT' | 'EXPERT';
 }
 
 const EMPTY_FORM = (): UserForm => ({
@@ -41,7 +41,7 @@ const EMPTY_FORM = (): UserForm => ({
   email: '',
   username: '',
   password: '',
-  role: 'USER',
+  role: 'CLIENT',
 });
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -128,23 +128,54 @@ export class DashboardComponent implements OnInit {
 
     this.userService.getAll().subscribe({
       next: (res) => {
+
         this.isLoadingUsers = false;
-        if (res.success) {
-          // Map ISO date strings → Date-compatible strings for the pipe
-          this.users = res.data;
+
+        if (res.data) {
+
+          this.users = res.data.map(u => ({
+            id: u.id,
+            username: u.username,
+            email: u.email,
+            role: u.role,
+            status: u.status,
+
+            fullName: u.username,
+            createdAt: new Date().toISOString()
+          }));
+
           this.applyUserFilters();
+
+          console.log("Users loaded:", this.users);
+
         } else {
-          this.apiError = res.message || 'Failed to load users.';
+
+          this.users = [];
+          this.filteredUsers = [];
+          this.totalUsers = 0;
+
+          this.apiError = res.message || "Failed to load users.";
         }
       },
+
       error: (err) => {
+
         this.isLoadingUsers = false;
+
+        this.users = [];
+        this.filteredUsers = [];
+        this.totalUsers = 0;
+
         this.apiError =
           err?.error?.message ||
-          (err.status === 403 ? 'Access denied — ADMIN role required.' :
-            err.status === 0   ? 'Cannot reach the server. Check the API URL.' :
-              'An unexpected error occurred.');
-      },
+          (err.status === 403
+            ? "Access denied — ADMIN role required."
+            : err.status === 0
+              ? "Cannot reach server."
+              : "Unexpected error.");
+
+        console.error(err);
+      }
     });
   }
 
@@ -188,9 +219,17 @@ export class DashboardComponent implements OnInit {
 
     obs.subscribe({
       next: (res) => {
-        if (res.success) {
+        if (res.status === 200 || res.status === 201) {
           const idx = this.users.findIndex(u => u.id === user.id);
-          if (idx !== -1) this.users[idx] = res.data;
+          if (idx !== -1) {
+
+            this.users[idx] = {
+              ...res.data,
+              fullName: res.data.username,
+              createdAt: this.users[idx].createdAt
+            };
+
+          }
           this.applyUserFilters();
         }
       },
@@ -248,7 +287,7 @@ export class DashboardComponent implements OnInit {
       email:    user.email,
       username: user.username,
       password: '',             // never pre-fill password
-      role:     user.role as 'ADMIN' | 'USER' | 'PARTNER',
+      role:     user.role as 'ADMIN' | 'CLIENT' | 'EXPERT',
     };
     this.formError     = '';
     this.formSuccess   = '';
@@ -298,20 +337,16 @@ export class DashboardComponent implements OnInit {
     obs.subscribe({
       next: (res) => {
         this.isSubmitting = false;
-        if (res.success) {
-          this.formSuccess = this.isEditMode
-            ? 'User updated successfully.'
-            : 'User created successfully.';
-
-          if (this.isEditMode) {
-            const idx = this.users.findIndex(u => u.id === this.editTargetId);
-            if (idx !== -1) this.users[idx] = res.data;
-          } else {
-            this.users.unshift(res.data);
+        if (res.status === 200 && res.data) {
+          const idx = this.users.findIndex(u => u.id === this.editTargetId);
+          if (idx !== -1) {
+            this.users[idx] = {
+              ...res.data,
+              fullName: res.data.username,
+              createdAt: this.users[idx].createdAt
+            };
           }
           this.applyUserFilters();
-
-          setTimeout(() => this.closeFormPanel(), 1500);
         } else {
           this.formError = res.message || 'Operation failed.';
         }
@@ -352,7 +387,7 @@ export class DashboardComponent implements OnInit {
   private loadUserInfo(): void {
     const stored =
       sessionStorage.getItem('fullName') ||
-      localStorage.getItem('fullName')   || 'Partner User';
+      localStorage.getItem('fullName')   || 'CLIENT User';
     this.setUser(stored);
   }
 
@@ -387,10 +422,15 @@ export class DashboardComponent implements OnInit {
     if (this.showFormPanel) this.closeFormPanel();
   }
 
+
   logout(): void {
     this.authService.logout();
     sessionStorage.clear();
     localStorage.clear();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login'])
+      .then(success => {console.log('Navigation success:', success);})
+      .catch(error => {console.error('Navigation error:', error);});
   }
+
+
 }

@@ -11,21 +11,20 @@ export interface UserRequestDTO {
   email: string;
   username: string;
   password?: string;           // required on create, optional on update
-  role: 'ADMIN' | 'USER' | 'PARTNER';
+  role: 'ADMIN' | 'CLIENT' | 'EXPERT';
 }
 
 export interface UserResponseDTO {
   id: number;
-  fullName: string;
-  email: string;
   username: string;
-  role: string;
+  email: string;
+  role: 'ADMIN' | 'CLIENT' | 'EXPERT';
   status: 'ACTIVE' | 'INACTIVE';
-  createdAt: string;           // ISO date string from backend
+  fullName: string;       // remove ?
+  createdAt: string;      // remove ?
 }
-
 export interface ApiResponse<T> {
-  success: boolean;
+  status: number;
   message: string;
   data: T;
 }
