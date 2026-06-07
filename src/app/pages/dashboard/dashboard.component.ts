@@ -24,8 +24,6 @@ import {
   QuotationResponseDTO,
   QuotationRequestDTO,
 } from '../../services/quotation.service';
-import {MatFormField, MatLabel} from "@angular/material/form-field";
-import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from "@angular/material/autocomplete";
 
 // ─── Local interfaces ────────────────────────────────────────────────────────
 
@@ -89,7 +87,7 @@ const EMPTY_QUOTATION_FORM = (): QuotationForm => ({
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, DatePipe, FormsModule, MatLabel, MatFormField, MatOption, MatAutocomplete, MatAutocompleteTrigger, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, DatePipe, FormsModule, ReactiveFormsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
@@ -426,15 +424,17 @@ export class DashboardComponent implements OnInit {
     this.isLoadingClaims = true;
     this.claimApiError = '';
     this.claimService.getAll().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isLoadingClaims = false;
-        if (res.data) {
-          this.claims = res.data;
-          this.stats.openClaims = res.data.filter(c => c.status === 'PENDING' || c.status === 'ASSIGNED').length;
+
+        const data = res?.data ?? res;
+
+        if (Array.isArray(data)) {
+          this.claims = data;
           this.applyClaimFilters();
         } else {
-          this.claims = []; this.filteredClaims = []; this.totalClaims = 0;
-          this.claimApiError = res.message || 'Failed to load claims.';
+          this.claims = [];
+          this.claimApiError = res?.message || 'Failed to load claims.';
         }
       },
       error: (err) => {
@@ -483,18 +483,14 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    if (!this.selectedUserId) {
-      this.claimFormError = 'Please select a user.';
-      return;
-    }
 
     this.isSubmittingClaim = true;
-
+    const userId = Number(localStorage.getItem('userId'));
     const dto: ClaimRequestDTO = {
       title: this.claimForm.title.trim(),
       description: this.claimForm.description.trim(),
       contractId: this.claimForm.contractId,
-      userId: this.selectedUserId   // ✅ FIXED (not currentUserId anymore)
+      userId: userId
     };
 
     this.claimService.create(dto).subscribe({
@@ -951,4 +947,5 @@ export class DashboardComponent implements OnInit {
     sessionStorage.clear(); localStorage.clear();
     this.router.navigate(['/login']);
   }
+
 }

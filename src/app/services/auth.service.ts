@@ -4,11 +4,12 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface LoginResponse {
-  access_token: string;
-  token_type: string;
+  accessToken: string;
+  tokenType: string;
   username: string;
   role: string;
   email: string;
+  idUser: number;
 }
 
 @Injectable({
@@ -42,9 +43,10 @@ export class AuthService {
           ? localStorage
           : sessionStorage;
 
-        storage.setItem('token', response.access_token);
+        storage.setItem('token', response.accessToken);
         storage.setItem('username', response.username);
         storage.setItem('role', response.role);
+        storage.setItem('email', response.email);
         storage.setItem('email', response.email);
       })
     );

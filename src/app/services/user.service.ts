@@ -99,4 +99,9 @@ export class UserService {
       `${this.base}/${id}/activate`, {}, { headers: this.headers() }
     );
   }
+
+  searchUsers(query: string) {
+    return this.http.get<any>(`/api/users/search?query=${query}`);
+  }
+
 }

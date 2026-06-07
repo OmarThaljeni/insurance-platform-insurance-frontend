@@ -48,12 +48,8 @@ export class LoginComponent {
 
     this.errorMessage = '';
 
-    if (
-      !this.username.trim() ||
-      !this.password.trim()
-    ) {
-      this.errorMessage =
-        'Please enter your username and password.';
+    if (!this.username.trim() || !this.password.trim()) {
+      this.errorMessage = 'Please enter your username and password.';
       return;
     }
 
@@ -61,14 +57,50 @@ export class LoginComponent {
 
     this.authService.login(
       this.username.trim(),
-      this.password.trim(),
-      this.rememberMe
+      this.password.trim()
     ).subscribe({
 
-      next: () => {
+      next: (response) => {
 
         this.isLoading = false;
         this.loginSuccess = true;
+
+        // Save JWT + user info
+        localStorage.setItem(
+          'accessToken',
+          response.accessToken
+        );
+
+        localStorage.setItem(
+          'tokenType',
+          response.tokenType
+        );
+
+        localStorage.setItem(
+          'idUser',
+          response.idUser
+        );
+
+        localStorage.setItem(
+          'username',
+          response.username
+        );
+
+        localStorage.setItem(
+          'email',
+          response.email
+        );
+
+        localStorage.setItem(
+          'username',
+          response.username
+        );
+
+        localStorage.setItem(
+          'role',
+          response.role
+        );
+
 
         setTimeout(() => {
 
@@ -76,6 +108,7 @@ export class LoginComponent {
 
         }, 800);
       },
+
 
       error: (err) => {
 

@@ -634,26 +634,6 @@
                    name="contractId"/>
           </div>
 
-          <!-- 👤 NEW: USER SEARCH -->
-          <mat-form-field class="w-100">
-            <mat-label>User</mat-label>
-
-            <input type="text"
-                   matInput
-                   [formControl]="userCtrl"
-                   [matAutocomplete]="auto"
-                   placeholder="Search user by name or surname">
-
-            <mat-autocomplete #auto="matAutocomplete"
-                              (optionSelected)="selectUser($event.option.value)">
-
-              <mat-option *ngFor="let u of filteredUsers" [value]="u">
-                {{ u.fullName }}
-              </mat-option>
-
-            </mat-autocomplete>
-          </mat-form-field>
-
           <!-- DESCRIPTION -->
           <div class="um-field um-field-full">
             <label class="um-label">Description <span class="um-required">*</span></label>
