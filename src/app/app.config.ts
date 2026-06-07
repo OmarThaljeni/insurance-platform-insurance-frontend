@@ -13,6 +13,7 @@ import {
 
 import { routes } from './app.routes';
 import {authInterceptor} from "./interceptor/authInterceptor";
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 
 export const appConfig: ApplicationConfig = {
@@ -25,6 +26,6 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         authInterceptor
       ])
-    )
+    ), provideAnimationsAsync()
   ]
 };

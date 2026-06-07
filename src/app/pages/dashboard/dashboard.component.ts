@@ -2,7 +2,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule, DatePipe }          from '@angular/common';
 import { Router, RouterModule }            from '@angular/router';
-import { FormsModule }                     from '@angular/forms';
+import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { AuthService }                     from '../../services/auth.service';
 import {
   UserService,
@@ -24,6 +24,8 @@ import {
   QuotationResponseDTO,
   QuotationRequestDTO,
 } from '../../services/quotation.service';
+import {MatFormField, MatLabel} from "@angular/material/form-field";
+import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from "@angular/material/autocomplete";
 
 // ─── Local interfaces ────────────────────────────────────────────────────────
 
@@ -87,7 +89,7 @@ const EMPTY_QUOTATION_FORM = (): QuotationForm => ({
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, DatePipe, FormsModule],
+  imports: [CommonModule, RouterModule, DatePipe, FormsModule, MatLabel, MatFormField, MatOption, MatAutocomplete, MatAutocompleteTrigger, ReactiveFormsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
@@ -202,11 +204,14 @@ export class DashboardComponent implements OnInit {
   totalQuotations = 0;
   isLoadingQuotations = false;
   quotationApiError = '';
+  userCtrl = new FormControl();
+  selectedUserId: number | null = null;
 
   showQuotationFormPanel = false;
   quotationForm: QuotationForm = EMPTY_QUOTATION_FORM();
   isSubmittingQuotation = false;
   quotationFormError = '';
+  userSearchText = '';
 
   readonly coverageTypes = [
     'Marine Hull', 'P&I Liability', 'Cargo', 'General Average',
@@ -228,6 +233,7 @@ export class DashboardComponent implements OnInit {
     this.loadClaims();
     this.loadContracts();
     this.loadQuotations();
+    this.initUserAutocomplete();
   }
 
   // ══════════════════════════════════════════════
@@ -261,6 +267,47 @@ export class DashboardComponent implements OnInit {
           (err.status === 403 ? 'Access denied — ADMIN role required.' :
             err.status === 0   ? 'Cannot reach server.' : 'Unexpected error.');
       },
+    });
+  }
+
+  searchUsers() {
+    if (this.userSearchText.length < 2) {
+      this.filteredUsers = [];
+      return;
+    }
+
+    this.userService.searchUsers(this.userSearchText)
+      .subscribe({
+        next: (res) => {
+          this.filteredUsers = res.data;
+        }
+      });
+  }
+
+  selectUser(user: any) {
+    this.selectedUserId = user.id;
+    this.userCtrl.setValue(user);
+  }
+
+  initUserAutocomplete(): void {
+    this.userCtrl.valueChanges.subscribe(value => {
+      const query =
+        typeof value === 'string'
+          ? value
+          : value?.fullName || '';
+      if (!query || query.length < 2) {
+        this.filteredUsers = [];
+        return;
+      }
+      this.userService.searchUsers(query)
+        .subscribe({
+          next: (res) => {
+            this.filteredUsers = res.data || [];
+          },
+          error: () => {
+            this.filteredUsers = [];
+          }
+        });
     });
   }
 
@@ -418,24 +465,49 @@ export class DashboardComponent implements OnInit {
   closeClaimForm(): void { this.showClaimFormPanel = false; this.claimFormError = ''; }
 
   submitClaim(): void {
+
     this.claimFormError = '';
-    if (!this.claimForm.title.trim())       { this.claimFormError = 'Title is required.'; return; }
-    if (!this.claimForm.description.trim()) { this.claimFormError = 'Description is required.'; return; }
-    if (!this.claimForm.contractId)         { this.claimFormError = 'Contract ID is required.'; return; }
+
+    if (!this.claimForm.title?.trim()) {
+      this.claimFormError = 'Title is required.';
+      return;
+    }
+
+    if (!this.claimForm.description?.trim()) {
+      this.claimFormError = 'Description is required.';
+      return;
+    }
+
+    if (!this.claimForm.contractId) {
+      this.claimFormError = 'Contract ID is required.';
+      return;
+    }
+
+    if (!this.selectedUserId) {
+      this.claimFormError = 'Please select a user.';
+      return;
+    }
+
     this.isSubmittingClaim = true;
+
     const dto: ClaimRequestDTO = {
-      title:       this.claimForm.title.trim(),
+      title: this.claimForm.title.trim(),
       description: this.claimForm.description.trim(),
-      contractId:  this.claimForm.contractId!,
-      userId:      this.currentUserId,
+      contractId: this.claimForm.contractId,
+      userId: this.selectedUserId   // ✅ FIXED (not currentUserId anymore)
     };
+
     this.claimService.create(dto).subscribe({
       next: (res) => {
         this.isSubmittingClaim = false;
+
         if (res.data) {
           this.claims.unshift(res.data);
           this.applyClaimFilters();
           this.closeClaimForm();
+
+          // reset form
+          this.resetClaimForm();
         } else {
           this.claimFormError = res.message || 'Failed to create claim.';
         }
@@ -443,8 +515,20 @@ export class DashboardComponent implements OnInit {
       error: (err) => {
         this.isSubmittingClaim = false;
         this.claimFormError = err?.error?.message || 'Server error.';
-      },
+      }
     });
+  }
+
+  resetClaimForm(): void {
+    this.claimForm = {
+      title: '',
+      description: '',
+      contractId: null
+    };
+
+    this.selectedUserId = null;
+    this.userSearchText = '';
+    this.filteredUsers = [];
   }
 
   updateClaimStatus(claim: ClaimResponseDTO, status: string): void {
