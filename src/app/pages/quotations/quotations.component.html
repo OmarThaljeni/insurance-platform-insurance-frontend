@@ -1,0 +1,129 @@
+<!-- quotations.component.html -->
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="page-breadcrumb">Portal / Quotations</div>
+    <h1 class="page-title">Quotations</h1>
+    <p class="page-sub">Request coverage and track quotation approvals.</p>
+  </div>
+  <div class="page-header-right">
+    <button class="btn-new-claim" type="button" (click)="openAddQuotationForm()">+ Request Quote</button>
+  </div>
+</div>
+
+<div class="card um-card" id="quotations-section">
+  <div class="card-header um-card-header">
+    <div class="um-header-left">
+      <h2 class="card-title">All Quotations</h2>
+      <span class="um-badge">{{ totalQuotations }}</span>
+    </div>
+    <div class="um-header-actions">
+      <div class="um-search-wrap">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.2"/><path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <input class="um-search" type="text" placeholder="Search coverage..." [(ngModel)]="quotationSearch" (input)="filterQuotations()"/>
+      </div>
+      <div class="um-filter-tabs">
+        <button class="um-tab" [class.active]="quotationStatusFilter === 'all'"      (click)="setQuotationFilter('all')">All</button>
+        <button class="um-tab" [class.active]="quotationStatusFilter === 'PENDING'"  (click)="setQuotationFilter('PENDING')">Pending</button>
+        <button class="um-tab" [class.active]="quotationStatusFilter === 'APPROVED'" (click)="setQuotationFilter('APPROVED')">Approved</button>
+        <button class="um-tab" [class.active]="quotationStatusFilter === 'REJECTED'" (click)="setQuotationFilter('REJECTED')">Rejected</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="um-api-error" *ngIf="quotationApiError">
+    {{ quotationApiError }}
+    <button class="um-retry-btn" (click)="loadQuotations()">Retry</button>
+  </div>
+  <div class="um-loading" *ngIf="isLoadingQuotations"><div class="um-spinner"></div>Loading quotations…</div>
+
+  <div class="um-table-wrap" *ngIf="!isLoadingQuotations && !quotationApiError">
+    <table class="um-table">
+      <thead><tr>
+        <th>#</th><th>Coverage Type</th><th>Amount</th><th>Status</th><th>Requested</th><th class="um-th-actions">Actions</th>
+      </tr></thead>
+      <tbody>
+      <tr class="um-row" *ngFor="let q of filteredQuotations">
+        <td class="um-username">{{ q.id }}</td>
+        <td><strong>{{ q.coverageType }}</strong></td>
+        <td><strong>{{ q.amount | number:'1.2-2' }} TND</strong></td>
+        <td><span class="claim-badge" [ngClass]="getQuotationStatusClass(q.status)">{{ q.status }}</span></td>
+        <td class="um-date">{{ q.createdAt | date:'MMM d, y' }}</td>
+        <td class="um-th-actions">
+          <div class="um-actions">
+            <button *ngIf="isAdmin() && q.status === 'PENDING'" class="um-action-btn um-action-approve" title="Approve" (click)="approveQuotation(q)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 7l2 2 3-3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button *ngIf="isAdmin() && q.status === 'PENDING'" class="um-action-btn um-action-danger" title="Reject" (click)="rejectQuotation(q)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 5l4 4M9 5l-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </button>
+            <button *ngIf="isAdmin()" class="um-action-btn um-action-danger" title="Delete" (click)="deleteQuotation(q)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M5 3.5V2h4v1.5M5.5 6v4.5M8.5 6v4.5M3 3.5l.5 9h7l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr *ngIf="filteredQuotations.length === 0">
+        <td colspan="6" class="um-empty">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="4" y="3" width="20" height="22" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M9 10h10M9 14h10M9 18h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          No quotations found
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Quotation Form Panel -->
+  <div class="card um-form-card" id="quotation-form-section" *ngIf="showQuotationFormPanel">
+    <div class="um-form-header">
+      <div class="um-form-header-left">
+        <div class="um-form-icon um-form-icon-add">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 9h8M9 5v8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <h2 class="um-form-title">Request a Quotation</h2>
+          <p class="um-form-sub">Submit a request for coverage. An admin will review and approve.</p>
+        </div>
+      </div>
+      <button class="um-form-close" (click)="closeQuotationForm()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="um-form-alert um-form-alert-error" *ngIf="quotationFormError">{{ quotationFormError }}</div>
+
+    <div class="um-form-grid">
+      <div class="um-field um-field-full">
+        <label class="um-label">Coverage Type <span class="um-required">*</span></label>
+        <select class="um-input" [(ngModel)]="quotationForm.coverageType" name="coverageType">
+          <option value="">— Select coverage type —</option>
+          <option *ngFor="let ct of coverageTypes" [value]="ct">{{ ct }}</option>
+        </select>
+      </div>
+      <div class="um-field">
+        <label class="um-label">Vessel / Asset Value (TND)</label>
+        <input class="um-input" type="number" placeholder="e.g. 500000" [(ngModel)]="quotationForm.vehicleValue" name="vehicleValue"/>
+      </div>
+      <div class="um-field">
+        <label class="um-label">Description</label>
+        <input class="um-input" type="text" placeholder="Brief description of the coverage need" [(ngModel)]="quotationForm.description" name="description"/>
+      </div>
+    </div>
+
+    <div class="um-form-actions">
+      <button class="um-modal-btn um-modal-cancel" type="button" (click)="closeQuotationForm()" [disabled]="isSubmittingQuotation">Cancel</button>
+      <button class="um-modal-btn um-form-submit-btn" type="button" (click)="submitQuotation()" [disabled]="isSubmittingQuotation">
+        <span class="um-spinner-sm" *ngIf="isSubmittingQuotation"></span>
+        {{ isSubmittingQuotation ? 'Submitting…' : 'Submit Request' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="dashboard-footer">
+  <span>© TIPIC 2025 — Immeuble Luxor 2, Rue 8300 Montplaisir, 1037 Tunis</span>
+  <span class="footer-sep">·</span>
+  <a routerLink="/terms">Terms</a>
+  <span class="footer-sep">·</span>
+  <a routerLink="/privacy">Privacy</a>
+</footer>

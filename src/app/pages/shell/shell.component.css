@@ -1,0 +1,22 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: #0f172a;
+  color: white;
+}
+
+.content {
+  flex: 1;
+  background: #f8fafc;
+  padding: 24px;
+  overflow-y: auto;
+}

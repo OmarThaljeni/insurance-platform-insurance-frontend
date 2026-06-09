@@ -78,7 +78,7 @@ export class LoginComponent {
 
         localStorage.setItem(
           'idUser',
-          response.idUser
+          String(response.idUser)
         );
 
         localStorage.setItem(

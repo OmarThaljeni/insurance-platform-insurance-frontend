@@ -1,0 +1,198 @@
+<!-- claims.component.html -->
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="page-breadcrumb">Portal / Claims</div>
+    <h1 class="page-title">Claims Management</h1>
+    <p class="page-sub">Declare, track, and manage all insurance claims.</p>
+  </div>
+  <div class="page-header-right">
+    <button class="btn-new-claim" type="button" (click)="openAddClaimForm()">+ Declare Claim</button>
+  </div>
+</div>
+
+<div class="card um-card" id="claims-section">
+  <div class="card-header um-card-header">
+    <div class="um-header-left">
+      <h2 class="card-title">All Claims</h2>
+      <span class="um-badge">{{ totalClaims }}</span>
+    </div>
+    <div class="um-header-actions">
+      <div class="um-search-wrap">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.2"/><path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <input class="um-search" type="text" placeholder="Search claims..." [(ngModel)]="claimSearch" (input)="filterClaims()"/>
+      </div>
+      <div class="um-filter-tabs">
+        <button class="um-tab" [class.active]="claimStatusFilter === 'all'"          (click)="setClaimFilter('all')">All</button>
+        <button class="um-tab" [class.active]="claimStatusFilter === 'PENDING'"      (click)="setClaimFilter('PENDING')">Pending</button>
+        <button class="um-tab" [class.active]="claimStatusFilter === 'ASSIGNED'"     (click)="setClaimFilter('ASSIGNED')">Assigned</button>
+        <button class="um-tab" [class.active]="claimStatusFilter === 'UNDER_REVIEW'" (click)="setClaimFilter('UNDER_REVIEW')">Review</button>
+        <button class="um-tab" [class.active]="claimStatusFilter === 'APPROVED'"     (click)="setClaimFilter('APPROVED')">Approved</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="um-api-error" *ngIf="claimApiError">
+    {{ claimApiError }}
+    <button class="um-retry-btn" (click)="loadClaims()">Retry</button>
+  </div>
+  <div class="um-loading" *ngIf="isLoadingClaims"><div class="um-spinner"></div>Loading claims…</div>
+
+  <div class="um-table-wrap" *ngIf="!isLoadingClaims && !claimApiError">
+    <table class="um-table">
+      <thead><tr>
+        <th>#</th><th>Title</th><th>Contract</th><th>Expert</th><th>Status</th><th>Date</th><th class="um-th-actions">Actions</th>
+      </tr></thead>
+      <tbody>
+      <tr class="um-row" *ngFor="let c of filteredClaims">
+        <td class="um-username">{{ c.id }}</td>
+        <td>
+          <div class="um-user-info">
+            <span class="um-fullname">{{ c.title }}</span>
+            <span class="um-email">{{ c.description | slice:0:60 }}{{ c.description.length > 60 ? '…' : '' }}</span>
+          </div>
+        </td>
+        <td class="um-username">#{{ c.contractId }}</td>
+        <td class="um-username">{{ c.expertId ? '#' + c.expertId : '—' }}</td>
+        <td><span class="claim-badge" [ngClass]="getClaimStatusClass(c.status)">{{ c.status }}</span></td>
+        <td class="um-date">{{ c.createdAt | date:'MMM d, y' }}</td>
+        <td class="um-th-actions">
+          <div class="um-actions">
+            <button *ngIf="isAdmin() && (c.status === 'PENDING' || c.status === 'ASSIGNED')" class="um-action-btn" title="Assign expert" (click)="openAssignExpert(c)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 12c0-2.8 2.2-5 5-5s5 2.2 5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M11 6.5l1.5 1.5-2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button *ngIf="isAdmin() && c.status === 'UNDER_REVIEW'" class="um-action-btn um-action-approve" title="Approve claim" (click)="updateClaimStatus(c,'APPROVED')">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 7l2 2 3-3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button *ngIf="isAdmin() && (c.status === 'PENDING' || c.status === 'UNDER_REVIEW')" class="um-action-btn um-action-danger" title="Reject claim" (click)="updateClaimStatus(c,'REJECTED')">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 5l4 4M9 5l-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </button>
+            <button *ngIf="isExpert() && c.status === 'ASSIGNED'" class="um-action-btn" title="Write report" (click)="openReportModal(c)" style="color:var(--teal)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1.5" width="10" height="11" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 5h5M4.5 7.5h5M4.5 10h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </button>
+            <button *ngIf="isAdmin()" class="um-action-btn um-action-danger" title="Delete claim" (click)="confirmDeleteClaim(c)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M5 3.5V2h4v1.5M5.5 6v4.5M8.5 6v4.5M3 3.5l.5 9h7l.5-9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr *ngIf="filteredClaims.length === 0">
+        <td colspan="7" class="um-empty">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="9" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M4 25c0-5.5 4.5-10 10-10s10 4.5 10 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          No claims found
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Declare Claim Form Panel -->
+  <div class="card um-form-card" id="claim-form-section" *ngIf="showClaimFormPanel">
+    <div class="um-form-header">
+      <div class="um-form-header-left">
+        <div class="um-form-icon um-form-icon-add">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M9 5.5V9l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="um-form-title">Declare a Claim</h2>
+          <p class="um-form-sub">Submit a new claim against an existing contract.</p>
+        </div>
+      </div>
+      <button class="um-form-close" (click)="closeClaimForm()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="um-form-alert um-form-alert-error" *ngIf="claimFormError">{{ claimFormError }}</div>
+
+    <div class="um-form-grid">
+      <div class="um-field">
+        <label class="um-label">Claim Title <span class="um-required">*</span></label>
+        <input class="um-input" type="text" placeholder="e.g. Hull damage — MV Carthage" [(ngModel)]="claimForm.title" name="claimTitle"/>
+      </div>
+      <div class="um-field">
+        <label class="um-label">Contract ID <span class="um-required">*</span></label>
+        <input class="um-input" type="number" placeholder="e.g. 12" [(ngModel)]="claimForm.contractId" name="contractId"/>
+      </div>
+      <div class="um-field um-field-full">
+        <label class="um-label">Description <span class="um-required">*</span></label>
+        <textarea class="um-input um-textarea" rows="4" placeholder="Describe the incident in detail…" [(ngModel)]="claimForm.description" name="claimDesc"></textarea>
+      </div>
+    </div>
+
+    <div class="um-form-actions">
+      <button class="um-modal-btn um-modal-cancel" type="button" (click)="closeClaimForm()" [disabled]="isSubmittingClaim">Cancel</button>
+      <button class="um-modal-btn um-form-submit-btn" type="button" (click)="submitClaim()" [disabled]="isSubmittingClaim">
+        <span class="um-spinner-sm" *ngIf="isSubmittingClaim"></span>
+        {{ isSubmittingClaim ? 'Submitting…' : 'Submit Claim' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Expert Modal -->
+<div class="um-modal-overlay" *ngIf="assignTarget" (click)="cancelAssign()">
+  <div class="um-modal" (click)="$event.stopPropagation()">
+    <div class="um-modal-icon">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="9" r="5" stroke="#4a9fd4" stroke-width="1.4"/><path d="M5 26c0-5.5 4.5-10 10-10s10 4.5 10 10" stroke="#4a9fd4" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </div>
+    <h3 class="um-modal-title">Assign Expert</h3>
+    <p class="um-modal-body">Enter the Expert user ID to assign to claim <strong>#{{ assignTarget?.id }}</strong>.</p>
+    <input class="um-input" style="margin-bottom:1rem" type="number" placeholder="Expert user ID" [(ngModel)]="assignExpertId"/>
+    <div class="um-modal-actions">
+      <button class="um-modal-btn um-modal-cancel"  (click)="cancelAssign()"  [disabled]="isAssigning">Cancel</button>
+      <button class="um-modal-btn um-modal-confirm" style="background:var(--blue)" (click)="executeAssign()" [disabled]="isAssigning || !assignExpertId">
+        <span class="um-spinner-sm" *ngIf="isAssigning"></span>
+        {{ isAssigning ? 'Assigning…' : 'Assign' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Expert Report Modal -->
+<div class="um-modal-overlay" *ngIf="reportTarget" (click)="cancelReport()">
+  <div class="um-modal" style="max-width:500px" (click)="$event.stopPropagation()">
+    <div class="um-modal-icon">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><rect x="5" y="3" width="20" height="24" rx="2" stroke="var(--teal)" stroke-width="1.4"/><path d="M9 10h12M9 15h12M9 20h8" stroke="var(--teal)" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </div>
+    <h3 class="um-modal-title">Write Expert Report</h3>
+    <p class="um-modal-body" style="margin-bottom:0.75rem">Claim <strong>#{{ reportTarget?.id }}</strong> — {{ reportTarget?.title }}</p>
+    <textarea class="um-input um-textarea" rows="5" placeholder="Enter your expert assessment and findings…" [(ngModel)]="reportText" style="margin-bottom:1rem"></textarea>
+    <div class="um-modal-actions">
+      <button class="um-modal-btn um-modal-cancel"  (click)="cancelReport()"   [disabled]="isSubmittingReport">Cancel</button>
+      <button class="um-modal-btn um-modal-confirm" style="background:var(--teal)" (click)="submitReport()" [disabled]="isSubmittingReport || !reportText.trim()">
+        <span class="um-spinner-sm" *ngIf="isSubmittingReport"></span>
+        {{ isSubmittingReport ? 'Submitting…' : 'Submit Report' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Claim Modal -->
+<div class="um-modal-overlay" *ngIf="deleteClaimTarget" (click)="cancelDeleteClaim()">
+  <div class="um-modal" (click)="$event.stopPropagation()">
+    <div class="um-modal-icon">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="12" stroke="#c0392b" stroke-width="1.4"/><path d="M15 9v7M15 18.5v1.5" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <h3 class="um-modal-title">Delete claim?</h3>
+    <p class="um-modal-body">Claim <strong>#{{ deleteClaimTarget?.id }} — {{ deleteClaimTarget?.title }}</strong> will be permanently removed.</p>
+    <div class="um-modal-actions">
+      <button class="um-modal-btn um-modal-cancel"  (click)="cancelDeleteClaim()"   [disabled]="isDeletingClaim">Cancel</button>
+      <button class="um-modal-btn um-modal-confirm" (click)="executeDeleteClaim()"  [disabled]="isDeletingClaim">
+        <span class="um-spinner-sm" *ngIf="isDeletingClaim"></span>
+        {{ isDeletingClaim ? 'Deleting…' : 'Delete' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="dashboard-footer">
+  <span>© TIPIC 2025 — Immeuble Luxor 2, Rue 8300 Montplaisir, 1037 Tunis</span>
+  <span class="footer-sep">·</span>
+  <a routerLink="/terms">Terms</a>
+  <span class="footer-sep">·</span>
+  <a routerLink="/privacy">Privacy</a>
+</footer>

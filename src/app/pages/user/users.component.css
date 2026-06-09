@@ -1,0 +1,33 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+
+.um-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.um-table th,
+.um-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.um-action-btn {
+  border: none;
+  cursor: pointer;
+  background: transparent;
+}
+
+.um-action-danger {
+  color: #dc2626;
+}
