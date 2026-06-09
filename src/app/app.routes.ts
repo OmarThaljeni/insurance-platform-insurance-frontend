@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 
 import { LoginComponent } from './auth/login/login.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 import { MarineSurveysComponent } from './pages/services/marine-surveys/marine-surveys.component';
 import { LegalAssistanceComponent } from './pages/services/legal-assistance/legal-assistance.component';
@@ -59,12 +58,6 @@ export const routes: Routes = [
         title: 'Quotations'
       }
     ]
-  },
-
-  // Existing pages
-  {
-    path: 'dashboard-old',
-    component: DashboardComponent
   },
 
   {
